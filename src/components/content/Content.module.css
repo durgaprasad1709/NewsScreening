@@ -1,0 +1,23 @@
+.content {
+  position: absolute;
+  left: 300px;
+  transition: left 0.3s ease; /* Smooth transition for left */
+  padding: 0 var(--mantine-spacing-md);
+  background-color: #f4f7f8d6;
+}
+.content.expanded {
+  left: 8px;
+}
+
+.actionIcon {
+  position: absolute;
+  top: 50%;
+  left: -28px;
+  transform: rotate(-90deg);
+
+  transition: rotate 1s ease;
+}
+
+.actionIcon.collapsed {
+  transform: rotate(90deg);
+}

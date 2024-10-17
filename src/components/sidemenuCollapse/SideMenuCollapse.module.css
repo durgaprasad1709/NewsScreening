@@ -1,0 +1,17 @@
+.actionIcon {
+  position: fixed;
+  top: 50%;
+  left: rem(285px);
+  transform: rotate(-90deg);
+
+  transition: rotate 1s ease, left 0.3s ease;
+
+  @media (min-width: $mantine-breakpoint-sm) {
+    z-index: 1000;
+  }
+}
+
+.actionIcon.collapsed {
+  transform: rotate(90deg);
+  left: 0;
+}

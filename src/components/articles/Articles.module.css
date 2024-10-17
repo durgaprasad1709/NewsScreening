@@ -1,0 +1,16 @@
+.title {
+  display: block;
+  margin-bottom: var(--mantine-spacing-md);
+}
+
+.article {
+  padding: var(--mantine-spacing-md) 0;
+  &:not(:last-child) {
+    border-bottom: rem(1px) solid
+      light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-5));
+  }
+}
+
+.headerBorder {
+  border-bottom: 1px solid var(--mantine-color-gray-5);
+}
