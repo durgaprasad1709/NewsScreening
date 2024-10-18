@@ -37,7 +37,6 @@ export default function Content() {
     >
       <SimpleGrid cols={2}>
         <Box>
-          {/* Entity Name */}
           <Flex my='md'>
             <Tooltip
               position='bottom'
@@ -48,14 +47,11 @@ export default function Content() {
                 className={clsx(classes.actionIcon, {
                   [classes.collapsed]: isMenuCollapsed,
                 })}
-                // className={classes.actionIcon}
                 onClick={toggleMenu}
                 variant='transparent'
                 c='premiumDark'
               >
                 <IconTriangleFilled size={22} />
-                {/* <IconLayoutSidebarLeftCollapse size={28} /> */}
-                {/* <IconMenu2 size={28} /> */}
               </ActionIcon>
             </Tooltip>
             <Text size='md' c='dimmed' mr='xs'>

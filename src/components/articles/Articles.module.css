@@ -14,3 +14,14 @@
 .headerBorder {
   border-bottom: 1px solid var(--mantine-color-gray-5);
 }
+
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.articlesContainer {
+  flex: 1;
+  overflow-y: hidden;
+}

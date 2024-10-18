@@ -1,13 +1,14 @@
 import { Badge, Box, Flex, ScrollArea, Text } from '@mantine/core';
 import { randomId } from '@mantine/hooks';
 import { IconExternalLink } from '@tabler/icons-react';
+
 import articles from '../../data/articles.json';
 import Filters from '../filters';
 import classes from './Articles.module.css';
 
 export default function Articles() {
   return (
-    <Box style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <Box className={classes.container}>
       {/* Header Section */}
       <Flex
         mb='xs'
@@ -26,8 +27,8 @@ export default function Articles() {
       </Flex>
 
       {/* Scrollable Area */}
-      <Box style={{ flex: 1, overflow: 'hidden' }}>
-        <ScrollArea style={{ height: '100%' }}>
+      <Box className={classes.articlesContainer}>
+        <ScrollArea h='100%'>
           {articles.map((article, index) => (
             <Box key={randomId()} className={classes.article} pr='sm'>
               <Flex justify={'space-between'} mb='md'>
