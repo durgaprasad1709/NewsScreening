@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "start": "json-server --watch db.json --port 3001"
+    "preview": "vite preview"
   },
   "dependencies": {
     "@mantine/charts": "^7.13.2",
