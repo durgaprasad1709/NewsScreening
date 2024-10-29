@@ -1,23 +1,33 @@
 .content {
-  position: absolute;
+  position: relative;
   left: 300px;
-  transition: left 0.3s ease; /* Smooth transition for left */
+  transition: left 0.3s ease;
   padding: 0 var(--mantine-spacing-md);
   background-color: #f4f7f8d6;
+  width: calc(100% - 330px);
+
+  display: grid;
+  place-items: center;
 }
 .content.expanded {
   left: 8px;
+  width: calc(100% - 30px);
 }
 
 .actionIcon {
-  position: absolute;
+  position: fixed;
   top: 50%;
-  left: -28px;
+  left: 290px;
   transform: rotate(-90deg);
 
-  transition: rotate 1s ease;
+  transition: rotate 1s ease, left 200ms ease;
 }
 
 .actionIcon.collapsed {
   transform: rotate(90deg);
+  left: 0;
+}
+
+.border {
+  border-top: 1px solid var(--mantine-color-gray-5);
 }

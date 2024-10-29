@@ -9,6 +9,17 @@
     border-bottom: rem(1px) solid
       light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-5));
   }
+
+  &:hover {
+    .actionIcon {
+      visibility: visible;
+    }
+  }
+}
+
+.actionIcon {
+  visibility: hidden;
+  transition: visibility 150ms ease;
 }
 
 .headerBorder {

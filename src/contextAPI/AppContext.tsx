@@ -23,7 +23,6 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({
   );
 };
 
-// Create a custom hook to use the AppContext
 export const useAppContext = () => {
   const context = useContext(AppContext);
   if (!context) {

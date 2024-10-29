@@ -1,0 +1,36 @@
+.button {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  transition: background-color 150ms ease, border-color 150ms ease,
+    z-index 150ms ease-in-out;
+  border-radius: var(--mantine-radius-sm);
+  padding: var(--mantine-spacing-sm);
+  border: rem(1px) solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-8));
+  background-color: light-dark(
+    var(--mantine-color-white),
+    var(--mantine-color-dark-8)
+  );
+  justify-content: center;
+  position: relative;
+
+  svg {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    z-index: -100;
+
+    transform: translate(-50%, -50%);
+  }
+
+  &[data-checked='true'] {
+    border-color: var(--mantine-color-blue-filled);
+    z-index: 1;
+  }
+}
+
+.body {
+  flex: 1;
+  margin-left: var(--mantine-spacing-md);
+}
