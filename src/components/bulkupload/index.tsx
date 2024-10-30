@@ -224,7 +224,7 @@ export default function BulkUpload() {
   const handleBulkDataChange = (el: SearchFormData) => {
     setEntityData({
       entityInfo: el,
-      articles: el.articles,
+      articles: el.articles ?? [],
     });
   };
 

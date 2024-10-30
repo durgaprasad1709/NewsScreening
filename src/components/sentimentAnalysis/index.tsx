@@ -60,7 +60,7 @@ export default function SentimentAnalysis() {
         size={'lg'}
         fw={600}
         ta={'center'}
-        mt='md'
+        my='md'
         lts={1}
         c={'premiumDark'}
       >
@@ -69,9 +69,9 @@ export default function SentimentAnalysis() {
 
       <PieChart
         strokeWidth={0}
-        // withLabelsLine
-        // labelsPosition='inside'
-        labelsType='percent'
+        // withLabelsLine={false}
+        labelsPosition='inside'
+        // labelsType='percent'
         withLabels
         data={sentimentItems}
         w='100%'

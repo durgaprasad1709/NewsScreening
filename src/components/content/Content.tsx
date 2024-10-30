@@ -20,7 +20,6 @@ import SentimentAnalysis from '../sentimentAnalysis';
 import { useDashboardContext } from '../../hooks';
 
 import classes from './Content.module.css';
-import { convertToItems, countOccurrences } from '../../utils';
 
 function InfoRow({ label, value }: { label: string; value: string | number }) {
   return (
@@ -55,14 +54,14 @@ export default function Content() {
   const { toggleMenu, isMenuCollapsed } = useAppContext();
   const { entityData, isFetching } = useDashboardContext();
 
-  // const uniqueKeywords = (entityData.articles ?? [])
-  //   .flatMap((article) => article.keywords)
-  //   .filter((keyword, index, self) => self.indexOf(keyword) === index)
-  //   .join(', ');
+  const uniqueKeywords = (entityData.articles ?? [])
+    .flatMap((article) => article.keywords)
+    .filter((keyword, index, self) => self.indexOf(keyword) === index)
+    .join(', ');
 
-  const keywordItems = convertToItems(
-    countOccurrences(entityData.articles ?? [], 'keywords'),
-  );
+  // const keywordItems = convertToItems(
+  //   countOccurrences(entityData.articles ?? [], 'keywords'),
+  // );
 
   return (
     <Box
@@ -94,9 +93,9 @@ export default function Content() {
       {entityData.articles?.length === 0 ? (
         <Text size='lg'> No data found yet...please continue screening.</Text>
       ) : (
-        <>
+        <div>
           <SimpleGrid cols={2}>
-            <Box>
+            <Box id='content-container'>
               <Flex direction={'row'} my='md' justify={'center'}>
                 <Text
                   fw={600}
@@ -164,10 +163,7 @@ export default function Content() {
 
               <Text size='md' c='dimmed'></Text>
               <Text ta={'justify'} size='md'>
-                <span className='dimmed-text'>Keywords:</span>{' '}
-                {keywordItems.map((item) => (
-                  <>{item.text}, </>
-                ))}
+                <span className='dimmed-text'>Keywords:</span> {uniqueKeywords}
               </Text>
 
               {/* Sentiment Analysis */}
@@ -177,7 +173,7 @@ export default function Content() {
               <Articles />
             </Box>
           </SimpleGrid>
-        </>
+        </div>
       )}
     </Box>
   );

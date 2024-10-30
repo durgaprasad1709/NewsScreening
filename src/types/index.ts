@@ -14,8 +14,8 @@ export interface Article {
   date: string;
   link: string;
   summary: string;
-  sentiment: 'Positive' | 'Negative' | 'Neutral';
-  keywords: '';
+  sentiment: string;
+  keywords: string[];
   domain?: boolean;
 }
 

@@ -28,8 +28,6 @@ export default function Articles() {
 
   const articles = entityData.articles ?? [];
 
-  console.log({ articles });
-
   const currentFilters = selectedFilters[entityName] ?? [];
 
   const filteredArticles =
@@ -128,7 +126,7 @@ export default function Articles() {
 
                 <Box pt='xs'>
                   <Flex gap={'xs'} mt={'sm'} wrap={'wrap'}>
-                    {JSON.parse(article.keywords).map((keyword: string) => (
+                    {article.keywords.map((keyword: string) => (
                       <Badge variant='default' key={randomId()}>
                         {keyword}
                       </Badge>

@@ -29,6 +29,8 @@ import classes from './NavbarSimple.module.css';
 import BulkUpload from '../bulkupload';
 import { SearchFormData } from '../../types';
 import { useDashboardContext } from '../../hooks';
+import jsonData from '../../data/individual.json';
+import { wait } from '../../utils';
 
 const segmentedControlData = [
   {
@@ -36,7 +38,7 @@ const segmentedControlData = [
     label: (
       <Center style={{ gap: 10 }}>
         <IconUser style={{ width: rem(16), height: rem(16) }} />
-        <span>Individual</span>
+        <span>Entity</span>
       </Center>
     ),
   },
@@ -152,53 +154,118 @@ export function NavbarSimple() {
         } as SearchFormData;
 
         setEntityData((prev) => ({ ...prev, articles: [] }));
-        const { data } = await fetchScreeningData(
-          'http://localhost:8000/items/link_extraction/',
-          formData,
-        );
+        setIsFetching(true);
 
-        if (data) {
+        await wait(3);
+
+        // const { data } = await fetchScreeningData(
+        //   'http://localhost:8000/items/link_extraction/',
+        //   formData,
+        // );
+
+        // const data = jsonData['Elon Musk'].map((el: any) => {
+        //   return {
+        //     ...el,
+        //     keywords: el.keywords.split(','),
+        //   };
+        // })
+        // console.log({ data });
+
+        const searchName = formData.name.toLowerCase();
+
+        if (!Object.keys(jsonData).includes(searchName)) {
+          notifications.show({
+            title: 'No data found',
+            message: 'Please continue screening with valid input',
+            position: 'top-right',
+            color: 'orange',
+          });
+        }
+
+        setIsFetching(false);
+
+        if (jsonData) {
           setEntityData({
             entityInfo: formData,
-            articles: data,
+            articles: jsonData[searchName as keyof typeof jsonData] ?? [],
           });
         }
       }
     } else {
       setEntityData((prev) => ({ ...prev, articles: [] }));
 
-      const bulkExtractData = bulkUploadData.map((el) => ({
-        ...el,
-        sentiment: 'negative',
-        start_year: el.fromDate.getFullYear(),
-        end_year: el.endDate.getFullYear(),
-      }));
+      setIsFetching(true);
 
-      const data = await fetchScreeningData(
-        'http://localhost:8000/items/bulk_extraction/',
-        { bulk_request: bulkExtractData },
+      await wait(3);
+
+      // const bulkExtractData = bulkUploadData.map((el) => ({
+      //   ...el,
+      //   sentiment: 'negative',
+      //   start_year: el.fromDate.getFullYear(),
+      //   end_year: el.endDate.getFullYear(),
+      // }));
+
+      // const data = await fetchScreeningData(
+      //   'http://localhost:8000/items/bulk_extraction/',
+      //   { bulk_request: bulkExtractData },
+      // );
+
+      const allKeys = Object.keys(jsonData);
+
+      const bulkUploadDataKeys = bulkUploadData.map((el) =>
+        el.name.toLowerCase(),
       );
-
-      console.log({ data });
-
-      if (data) {
-        const bulkData: any = Object.keys(data).map((key, index) => {
-          // console.log({ key });
-          if (key.includes(bulkUploadData[index].name)) {
-            return { ...bulkUploadData[index], articles: data[key].data };
-          }
+      if (!bulkUploadDataKeys.every((el) => allKeys.includes(el))) {
+        setEntityData((prev) => ({ ...prev, articles: [] }));
+        notifications.show({
+          title: 'No data found',
+          message: 'Please continue screening with valid input',
+          position: 'top-right',
+          color: 'orange',
         });
-        // console.log({ bulkData });
+
+        setIsFetching(false);
+        return;
+      }
+
+      if (jsonData) {
+        const bulkData: any = bulkUploadDataKeys.map((key, index) => {
+          return {
+            ...bulkUploadData[index],
+            articles: jsonData[key as keyof typeof jsonData],
+          };
+        });
+
         if (bulkData.length > 0) {
           setBulkUploadData(bulkData);
-        }
 
-        setEntityData({
-          entityInfo: bulkUploadData[0],
-          // articles: data[bulkUploadData[0].name],
-          articles: bulkData[0]?.articles,
-        });
+          setEntityData({
+            entityInfo: bulkUploadData[0],
+            articles: bulkData[0]?.articles,
+          });
+        }
       }
+
+      setIsFetching(false);
+
+      // if (data) {
+      //   const bulkData: any = Object.keys(data).map((key, index) => {
+      //     // console.log({ key });
+      //     if (key.includes(bulkUploadData[index].name)) {
+      //       return { ...bulkUploadData[index], articles: data[key].data };
+      //     }
+      //   });
+      //   // console.log({ bulkData });
+      //   if (bulkData.length > 0) {
+      //     setBulkUploadData(bulkData);
+      //   }
+
+      //   setEntityData({
+      //     entityInfo: bulkUploadData[0],
+      //     // articles: data[bulkUploadData[0].name],
+      //     articles: bulkData[0]?.articles,
+      //   });
+      // }
     }
   };
 

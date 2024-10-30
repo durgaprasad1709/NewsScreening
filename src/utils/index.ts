@@ -17,8 +17,7 @@ export const countOccurrences = (
   // if (keywordsParsed === 'string') {
   return articles
     .flatMap((article) =>
-      (article[property] as string)
-        .split(', ')
+      (article[property] as string[])
         .map((item: string) => item.trim()),
     )
     .reduce((acc: Record<string, number>, item: string) => {
