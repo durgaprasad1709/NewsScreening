@@ -277,8 +277,7 @@ export function NavbarSimple() {
         <div className={classes.navbarMain}>
           <Group className={classes.header} justify='space-between'>
             <Text fw={500} size='md' ta={'center'} w='100%'>
-              <span className={classes.eyTitle}> EY </span>Negative News
-              Screening Tool
+              <span className={classes.eyTitle}> EY </span>News Screening Tool
             </Text>
           </Group>
           <ScrollArea className={classes.scrollable} scrollbarSize={5}>
