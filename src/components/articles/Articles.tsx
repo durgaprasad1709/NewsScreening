@@ -13,16 +13,22 @@ import { IconExternalLink } from '@tabler/icons-react';
 import Filters from '../filters';
 import classes from './Articles.module.css';
 import { useDashboardContext } from '../../hooks';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const removeDuplicates = (array: string[]) => [...new Set(array)];
 
 export default function Articles() {
   const { entityData } = useDashboardContext();
+  const [height, setHeight] = useState<number>(0);
 
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, string[]>
   >({});
+
+  useEffect(() => {
+    const el = document.querySelector('#content-container');
+    setHeight(el?.clientHeight ?? 0);
+  }, []);
 
   const entityName = entityData.entityInfo.name;
 
@@ -70,7 +76,7 @@ export default function Articles() {
 
       {/* Scrollable Area */}
       <Box className={classes.articlesContainer}>
-        <ScrollArea h='100%' scrollbarSize={5}>
+        <ScrollArea h={height} scrollbarSize={5}>
           {filteredArticles?.map((article) => {
             let sentiment = 'Negative';
             if (article.sentiment.toLowerCase().includes('neutral')) {

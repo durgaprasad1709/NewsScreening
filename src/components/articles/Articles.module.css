@@ -27,7 +27,7 @@
 }
 
 .container {
-  height: 100vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
@@ -35,4 +35,5 @@
 .articlesContainer {
   flex: 1;
   overflow-y: hidden;
+  /* min-height: 890px; */
 }

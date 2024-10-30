@@ -156,7 +156,7 @@ export function NavbarSimple() {
         setEntityData((prev) => ({ ...prev, articles: [] }));
         setIsFetching(true);
 
-        await wait(3);
+        await wait(2);
 
         // const { data } = await fetchScreeningData(
         //   'http://localhost:8000/items/link_extraction/',
@@ -196,7 +196,7 @@ export function NavbarSimple() {
 
       setIsFetching(true);
 
-      await wait(3);
+      await wait(2);
 
       // const bulkExtractData = bulkUploadData.map((el) => ({
       //   ...el,

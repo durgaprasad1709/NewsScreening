@@ -258,7 +258,7 @@ export default function BulkUpload() {
           >
             <Box className={classes.body}>
               <Text fw={500} size='md' mb={'xs'}>
-                {el.name}
+                {el.name.toUpperCase()}
               </Text>
 
               <Text c='dimmed' size='sm'>
