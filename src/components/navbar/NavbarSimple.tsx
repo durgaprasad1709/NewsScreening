@@ -68,7 +68,7 @@ export function NavbarSimple() {
     setBulkUploadData,
   } = useDashboardContext();
 
-  const [controller, setController] = useState<AbortController | null>(null);
+  const [controller] = useState<AbortController | null>(null);
 
   const today = new Date();
   const lastYear = new Date(today);
@@ -96,52 +96,52 @@ export function NavbarSimple() {
     },
   });
 
-  const fetchScreeningData = async (
-    url: string,
-    data: SearchFormData | { bulk_request: SearchFormData[] },
-  ) => {
-    const abortController = new AbortController();
-    setController(abortController);
-    setIsFetching(true);
+  // const fetchScreeningData = async (
+  //   url: string,
+  //   data: SearchFormData | { bulk_request: SearchFormData[] },
+  // ) => {
+  //   const abortController = new AbortController();
+  //   setController(abortController);
+  //   setIsFetching(true);
 
-    try {
-      const response = await fetch(url, {
-        signal: abortController.signal,
-        body: JSON.stringify(data),
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+  //   try {
+  //     const response = await fetch(url, {
+  //       signal: abortController.signal,
+  //       body: JSON.stringify(data),
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
 
-      if (!response.ok) throw new Error('Network response was not ok');
+  //     if (!response.ok) throw new Error('Network response was not ok');
 
-      const result = await response.json();
-      setIsFetching(false);
-      return result;
-    } catch (error) {
-      setIsFetching(false);
-      handleError(error as Error | DOMException);
-    }
-  };
+  //     const result = await response.json();
+  //     setIsFetching(false);
+  //     return result;
+  //   } catch (error) {
+  //     setIsFetching(false);
+  //     handleError(error as Error | DOMException);
+  //   }
+  // };
 
-  const handleError = (error: Error | DOMException) => {
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      notifications.show({
-        title: 'Cancelled',
-        message: 'Your request has been cancelled',
-        position: 'top-right',
-        color: 'orange',
-      });
-    } else {
-      notifications.show({
-        title: 'Something went wrong!!',
-        message: "We couldn't fetch the data",
-        position: 'top-right',
-        color: 'red',
-      });
-    }
-  };
+  // const handleError = (error: Error | DOMException) => {
+  //   if (error instanceof DOMException && error.name === 'AbortError') {
+  //     notifications.show({
+  //       title: 'Cancelled',
+  //       message: 'Your request has been cancelled',
+  //       position: 'top-right',
+  //       color: 'orange',
+  //     });
+  //   } else {
+  //     notifications.show({
+  //       title: 'Something went wrong!!',
+  //       message: "We couldn't fetch the data",
+  //       position: 'top-right',
+  //       color: 'red',
+  //     });
+  //   }
+  // };
 
   const handleSearch = async () => {
     if (searchType === 'individual') {
