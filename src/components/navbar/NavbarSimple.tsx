@@ -3,11 +3,8 @@ import {
   Button,
   Center,
   Group,
-  NumberInput,
-  ScrollArea,
   SegmentedControl,
   Text,
-  TextInput,
   rem,
 } from '@mantine/core';
 import {
@@ -18,21 +15,19 @@ import {
   IconUsers,
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
-import { useForm } from '@mantine/form';
-import { useState } from 'react';
-import { notifications } from '@mantine/notifications';
-import { DateInput } from '@mantine/dates';
+import { useRef, useState } from 'react';
 import clsx from 'clsx';
 
 import { useAppContext } from '../../contextAPI/AppContext';
 import classes from './NavbarSimple.module.css';
 import BulkUpload from '../bulkupload';
-import { SearchFormData } from '../../types';
+import EntityForm from '../entityForm';
+import { ArticleData, SearchFormData } from '../../types';
+import { formatDate } from '../../utils';
 import { useDashboardContext } from '../../hooks';
-import jsonData from '../../data/individual.json';
-import { wait } from '../../utils';
+import { notifications } from '@mantine/notifications';
 
-const segmentedControlData = [
+const SEGMENTED_CONTROL_OPTIONS = [
   {
     value: 'individual',
     label: (
@@ -53,341 +48,198 @@ const segmentedControlData = [
   },
 ];
 
+type SearchType = 'individual' | 'bulk';
+
+// Fetch Data Function
+const fetchData = async (
+  url: string,
+  data: SearchFormData | { bulk_request: SearchFormData[] },
+  abortController: AbortController,
+  setIsFetching: (isFetching: boolean) => void,
+) => {
+  setIsFetching(true);
+  try {
+    const response = await fetch(url, {
+      signal: abortController.signal,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    return await response.json();
+  } finally {
+    setIsFetching(false);
+  }
+};
+
 export function NavbarSimple() {
   const navigate = useNavigate();
-  const [searchType, setSearchType] = useState<'individual' | 'bulk'>(
-    'individual',
-  );
-
   const { isMenuCollapsed } = useAppContext();
-  const {
-    isFetching,
-    setIsFetching,
-    setEntityData,
-    bulkUploadData,
-    setBulkUploadData,
-  } = useDashboardContext();
+  const [searchType, setSearchType] = useState<SearchType>('individual');
+  const [entities, setEntities] = useState<SearchFormData[]>([]);
+  const [controller, setController] = useState<AbortController | null>(null);
+  const { isFetching, setIsFetching, setEntityData, setBulkUploadData } =
+    useDashboardContext();
+  const formRef = useRef<HTMLFormElement | null>(null);
 
-  const [controller] = useState<AbortController | null>(null);
-
-  const today = new Date();
-  const lastYear = new Date(today);
-  lastYear.setFullYear(today.getFullYear() - 1);
-
-  const initialValues: SearchFormData = {
-    name: '',
-    country: '',
-    domain: '',
-    fromDate: lastYear,
-    endDate: new Date(),
-    numberOfURLs: '15',
-  };
-
-  const form = useForm({
-    mode: 'uncontrolled',
-    initialValues,
-    validate: {
-      name: (value) =>
-        value.length < 3 ? 'Name must have at least 3 letters' : null,
-      country: (value) =>
-        value.length < 3 ? 'Country must have at least 3 letters' : null,
-      domain: (value) =>
-        value.length < 2 ? 'Domain must have at least 2 letters' : null,
-    },
-  });
-
-  // const fetchScreeningData = async (
-  //   url: string,
-  //   data: SearchFormData | { bulk_request: SearchFormData[] },
-  // ) => {
-  //   const abortController = new AbortController();
-  //   setController(abortController);
-  //   setIsFetching(true);
-
-  //   try {
-  //     const response = await fetch(url, {
-  //       signal: abortController.signal,
-  //       body: JSON.stringify(data),
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //     });
-
-  //     if (!response.ok) throw new Error('Network response was not ok');
-
-  //     const result = await response.json();
-  //     setIsFetching(false);
-  //     return result;
-  //   } catch (error) {
-  //     setIsFetching(false);
-  //     handleError(error as Error | DOMException);
-  //   }
-  // };
-
-  // const handleError = (error: Error | DOMException) => {
-  //   if (error instanceof DOMException && error.name === 'AbortError') {
-  //     notifications.show({
-  //       title: 'Cancelled',
-  //       message: 'Your request has been cancelled',
-  //       position: 'top-right',
-  //       color: 'orange',
-  //     });
-  //   } else {
-  //     notifications.show({
-  //       title: 'Something went wrong!!',
-  //       message: "We couldn't fetch the data",
-  //       position: 'top-right',
-  //       color: 'red',
-  //     });
-  //   }
-  // };
-
-  const handleSearch = async () => {
+  const handleSearch = async (values: SearchFormData) => {
+    let formData = null;
     if (searchType === 'individual') {
-      if (!form.validate().hasErrors) {
-        const formData = {
-          ...form.getValues(),
-          sentiment: 'negative',
-          start_year: form.getValues().fromDate.getFullYear(),
-          end_year: form.getValues().endDate.getFullYear(),
-        } as SearchFormData;
-
-        setEntityData((prev) => ({ ...prev, articles: [] }));
-        setIsFetching(true);
-
-        await wait(2);
-
-        // const { data } = await fetchScreeningData(
-        //   'http://localhost:8000/items/link_extraction/',
-        //   formData,
-        // );
-
-        // const data = jsonData['Elon Musk'].map((el: any) => {
-        //   return {
-        //     ...el,
-        //     keywords: el.keywords.split(','),
-        //   };
-        // })
-        // console.log({ data });
-
-        const searchName = formData.name.toLowerCase();
-
-        if (!Object.keys(jsonData).includes(searchName)) {
-          notifications.show({
-            title: 'No data found',
-            message: 'Please continue screening with valid input',
-            position: 'top-right',
-            color: 'orange',
-          });
-        }
-
-        setIsFetching(false);
-
-        if (jsonData) {
-          setEntityData({
-            entityInfo: formData,
-            articles: jsonData[searchName as keyof typeof jsonData] ?? [],
-          });
-        }
-      }
+      formData = {
+        ...values,
+        start_date: formatDate(values.start_date),
+        end_date: formatDate(values.end_date),
+      };
     } else {
-      setEntityData((prev) => ({ ...prev, articles: [] }));
+      formData = { bulk_request: entities.map(formatEntity) };
+    }
 
-      setIsFetching(true);
+    const abortController = new AbortController();
+    setController(abortController);
 
-      await wait(2);
+    const url =
+      searchType === 'individual'
+        ? 'http://127.0.0.1:8000/items/link_extraction'
+        : 'http://127.0.0.1:8000/items/bulk_extraction';
 
-      // const bulkExtractData = bulkUploadData.map((el) => ({
-      //   ...el,
-      //   sentiment: 'negative',
-      //   start_year: el.fromDate.getFullYear(),
-      //   end_year: el.endDate.getFullYear(),
-      // }));
+    const data = await fetchData(url, formData, abortController, setIsFetching);
 
-      // const data = await fetchScreeningData(
-      //   'http://localhost:8000/items/bulk_extraction/',
-      //   { bulk_request: bulkExtractData },
-      // );
+    if (searchType === 'individual') {
+      setEntityData({
+        entityInfo: values,
+        articles: data.data,
+        'keywords-data-agg': data['keywords-data-agg'],
+      });
+    } else {
+      const responseKeys = Object.keys(data);
+      const bulkData = entities.map((entityInfo) => {
+        const responseKeyIndex = responseKeys.findIndex((key) =>
+          key.includes(entityInfo.name),
+        );
+        const jsonData = data[responseKeys[responseKeyIndex]];
 
-      const allKeys = Object.keys(jsonData);
+        return {
+          entityInfo,
+          articles: jsonData.data as ArticleData[],
+          'keywords-data-agg': jsonData['keywords-data-agg'],
+        };
+      });
 
-      const bulkUploadDataKeys = bulkUploadData.map((el) =>
-        el.name.toLowerCase(),
-      );
-      if (!bulkUploadDataKeys.every((el) => allKeys.includes(el))) {
-        setEntityData((prev) => ({ ...prev, articles: [] }));
-        notifications.show({
-          title: 'No data found',
-          message: 'Please continue screening with valid input',
-          position: 'top-right',
-          color: 'orange',
-        });
-
-        setIsFetching(false);
-        return;
-      }
-
-      if (jsonData) {
-        const bulkData: any = bulkUploadDataKeys.map((key, index) => {
-          return {
-            ...bulkUploadData[index],
-            articles: jsonData[key as keyof typeof jsonData],
-          };
-        });
-
-        if (bulkData.length > 0) {
-          setBulkUploadData(bulkData);
-
-          setEntityData({
-            entityInfo: bulkUploadData[0],
-            articles: bulkData[0]?.articles,
-          });
-        }
-      }
-
-      setIsFetching(false);
-
-      // if (data) {
-      //   const bulkData: any = Object.keys(data).map((key, index) => {
-      //     // console.log({ key });
-      //     if (key.includes(bulkUploadData[index].name)) {
-      //       return { ...bulkUploadData[index], articles: data[key].data };
-      //     }
-      //   });
-      //   // console.log({ bulkData });
-      //   if (bulkData.length > 0) {
-      //     setBulkUploadData(bulkData);
-      //   }
-
-      //   setEntityData({
-      //     entityInfo: bulkUploadData[0],
-      //     // articles: data[bulkUploadData[0].name],
-      //     articles: bulkData[0]?.articles,
-      //   });
-      // }
+      setEntityData(bulkData[0]);
+      setBulkUploadData(bulkData);
     }
   };
+
+  const handleSearchClick = () => {
+    if (searchType === 'individual') {
+      formRef.current?.requestSubmit();
+    } else {
+      handleSearch(entities[0]);
+    }
+  };
+
+  const handleLogout = () => navigate('/login');
+  const handleCancelRequest = () => {
+    controller?.abort();
+    notifications.show({
+      title: 'Cancelled',
+      message: 'Network request has been cancelled',
+      position: 'top-right',
+      color: 'orange',
+    });
+  };
+
+  const formatEntity = (entity: SearchFormData) => ({
+    ...entity,
+    start_date: formatDate(entity.start_date),
+    end_date: formatDate(entity.end_date),
+  });
 
   return (
     <nav
       className={clsx(classes.navbar, { [classes.collapsed]: isMenuCollapsed })}
     >
       <Box>
-        <div className={classes.navbarMain}>
-          <Group className={classes.header} justify='space-between'>
-            <Text fw={500} size='md' ta={'center'} w='100%'>
-              <span className={classes.eyTitle}> EY </span>2 Sents!
-            </Text>
-          </Group>
-          <ScrollArea className={classes.scrollable} scrollbarSize={5}>
-            <Box h='100%'>
-              <Group>
-                <SegmentedControl
-                  color={'premiumDark'}
-                  w='100%'
-                  defaultValue={searchType}
-                  onChange={(value) =>
-                    setSearchType(value as 'individual' | 'bulk')
-                  }
-                  data={segmentedControlData}
-                />
-              </Group>
-
-              {searchType === 'individual' ? (
-                <Box mt='md'>
-                  <TextInput
-                    label='Name'
-                    placeholder='Enter Name'
-                    mb='md'
-                    withAsterisk
-                    key={form.key('name')}
-                    {...form.getInputProps('name')}
-                  />
-                  <TextInput
-                    label='Country'
-                    placeholder='Enter Country'
-                    mb='md'
-                    withAsterisk
-                    key={form.key('country')}
-                    {...form.getInputProps('country')}
-                  />
-                  <TextInput
-                    label='Domain'
-                    placeholder='Enter Domain'
-                    mb='md'
-                    withAsterisk
-                    key={form.key('domain')}
-                    {...form.getInputProps('domain')}
-                  />
-                  <DateInput
-                    label='From Date'
-                    placeholder='Select From Date'
-                    mb='md'
-                    withAsterisk
-                    key={form.key('fromDate')}
-                    {...form.getInputProps('fromDate')}
-                  />
-                  <DateInput
-                    label='End Date'
-                    placeholder='Select End Date'
-                    mb='md'
-                    withAsterisk
-                    key={form.key('endDate')}
-                    {...form.getInputProps('endDate')}
-                  />
-                  <NumberInput
-                    label='Number of URLs'
-                    placeholder='Enter Number of URLs'
-                    mb='md'
-                    key={form.key('numberOfURLs')}
-                    {...form.getInputProps('numberOfURLs')}
-                  />
-                </Box>
-              ) : (
-                <BulkUpload />
-              )}
-            </Box>
-          </ScrollArea>
-        </div>
-        <div className={classes.footer}>
-          {!isFetching ? (
-            <Button
-              bg='premiumDark'
-              variant='filled'
-              fullWidth
-              leftSection={<IconSearch size={14} />}
-              onClick={handleSearch}
-              loading={isFetching}
-            >
-              Search
-            </Button>
-          ) : (
-            <Button
-              color='red'
-              variant='light'
-              leftSection={<IconCancel size={14} />}
-              fullWidth
-              onClick={() => {
-                controller?.abort();
-                setIsFetching(false);
-              }}
-            >
-              Cancel Request
-            </Button>
-          )}
-
-          <Button
-            mt='md'
-            variant='default'
-            fullWidth
-            leftSection={<IconLogout size={14} />}
-            onClick={() => navigate('/login')}
-          >
-            Logout
-          </Button>
-        </div>
+        <NavbarHeader />
+        <Box className={classes.scrollable}>
+          <Box h='100%'>
+            <Group>
+              <SegmentedControl
+                color='premiumDark'
+                w='100%'
+                value={searchType}
+                onChange={(value) => setSearchType(value as SearchType)}
+                data={SEGMENTED_CONTROL_OPTIONS}
+              />
+            </Group>
+            {searchType === 'individual' ? (
+              <EntityForm onSubmit={handleSearch} formRef={formRef} />
+            ) : (
+              <BulkUpload entities={entities} setEntities={setEntities} />
+            )}
+          </Box>
+        </Box>
+        <Footer
+          isFetching={isFetching}
+          onSearchClick={handleSearchClick}
+          onCancelRequest={handleCancelRequest}
+          onLogout={handleLogout}
+        />
       </Box>
     </nav>
   );
 }
+
+// Navbar Header Component
+const NavbarHeader = () => (
+  <Group className={classes.header} justify='space-between'>
+    <Text fw={500} size='md' ta='center' w='100%'>
+      <span className={classes.eyTitle}> EY </span>2 Sents!
+    </Text>
+  </Group>
+);
+
+// Footer Component
+const Footer = ({
+  isFetching,
+  onSearchClick,
+  onCancelRequest,
+  onLogout,
+}: {
+  isFetching: boolean;
+  onSearchClick: () => void;
+  onCancelRequest: () => void;
+  onLogout: () => void;
+}) => (
+  <div className={classes.footer}>
+    {isFetching ? (
+      <Button
+        color='red'
+        variant='light'
+        leftSection={<IconCancel size={16} />}
+        fullWidth
+        onClick={onCancelRequest}
+      >
+        Cancel Request
+      </Button>
+    ) : (
+      <Button
+        bg='premiumDark'
+        variant='filled'
+        fullWidth
+        leftSection={<IconSearch size={16} />}
+        onClick={onSearchClick}
+      >
+        Search
+      </Button>
+    )}
+    <Button
+      mt='md'
+      variant='default'
+      fullWidth
+      leftSection={<IconLogout size={16} />}
+      onClick={onLogout}
+    >
+      Logout
+    </Button>
+  </div>
+);

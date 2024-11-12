@@ -69,9 +69,7 @@ export default function SentimentAnalysis() {
 
       <PieChart
         strokeWidth={0}
-        // withLabelsLine={false}
         labelsPosition='inside'
-        // labelsType='percent'
         withLabels
         data={sentimentItems}
         w='100%'

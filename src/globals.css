@@ -21,3 +21,8 @@
 ::-webkit-scrollbar-thumb:hover {
   background-color: #555;
 }
+
+#mermaid {
+  width: 150%;
+  overflow: hidden;
+}

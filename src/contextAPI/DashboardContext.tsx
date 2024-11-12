@@ -1,11 +1,12 @@
 import React, { createContext, ReactNode, useMemo, useState } from 'react';
-import { EntityData, SearchFormData } from '../types';
+import { JsonResponse } from '../types';
+import { initialFormValues } from '../utils';
 
 interface DashboardContextType {
-  bulkUploadData: SearchFormData[];
-  setBulkUploadData: React.Dispatch<React.SetStateAction<SearchFormData[]>>;
-  entityData: EntityData;
-  setEntityData: React.Dispatch<React.SetStateAction<EntityData>>;
+  bulkUploadData: JsonResponse[];
+  setBulkUploadData: React.Dispatch<React.SetStateAction<JsonResponse[]>>;
+  entityData: JsonResponse;
+  setEntityData: React.Dispatch<React.SetStateAction<JsonResponse>>;
   isFetching: boolean;
   setIsFetching: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -17,18 +18,12 @@ export const DashboardContext = createContext<DashboardContextType | undefined>(
 export const DashboardContextProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [bulkUploadData, setBulkUploadData] = useState<SearchFormData[]>([]);
   const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [entityData, setEntityData] = useState<EntityData>({
-    entityInfo: {
-      name: '',
-      country: '',
-      domain: '',
-      fromDate: new Date(),
-      endDate: new Date(),
-      numberOfURLs: '',
-    },
+  const [bulkUploadData, setBulkUploadData] = useState<JsonResponse[]>([]);
+  const [entityData, setEntityData] = useState<JsonResponse>({
+    entityInfo: initialFormValues,
     articles: [],
+    'keywords-data-agg': [],
   });
 
   const value = useMemo(
@@ -40,7 +35,7 @@ export const DashboardContextProvider: React.FC<{ children: ReactNode }> = ({
       isFetching,
       setIsFetching,
     }),
-    [bulkUploadData, entityData, isFetching],
+    [bulkUploadData, entityData, isFetching, setIsFetching],
   );
 
   return (

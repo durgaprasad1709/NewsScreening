@@ -1,6 +1,7 @@
 import {
   ActionIcon,
   Box,
+  Center,
   Divider,
   Flex,
   LoadingOverlay,
@@ -16,10 +17,13 @@ import 'tippy.js/animations/scale.css';
 
 import { useAppContext } from '../../contextAPI/AppContext';
 import Articles from '../articles/Articles';
-import SentimentAnalysis from '../sentimentAnalysis';
+// import SentimentAnalysis from '../sentimentAnalysis';
 import { useDashboardContext } from '../../hooks';
 
 import classes from './Content.module.css';
+import SentimentAnalysis from '../sentimentAnalysis';
+import { generateMermaidChartData } from '../../utils';
+import MermaidChart from '../Chart/Chart';
 
 function InfoRow({ label, value }: { label: string; value: string | number }) {
   return (
@@ -34,34 +38,19 @@ function InfoRow({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-// const options: any = {
-//   colors: ['#7CB9E8', '#0066b2', '#5072A7', '#1F305E'],
-//   enableTooltip: true,
-//   deterministic: false,
-//   fontFamily: 'impact',
-//   fontSizes: [20, 40] as [number, number],
-//   fontStyle: 'normal',
-//   fontWeight: 'normal',
-//   padding: 1,
-//   rotations: 3,
-//   rotationAngles: [0, 0] as [number, number],
-//   scale: 'sqrt',
-//   spiral: 'archimedean',
-//   transitionDuration: 1000,
-// };
-
 export default function Content() {
   const { toggleMenu, isMenuCollapsed } = useAppContext();
   const { entityData, isFetching } = useDashboardContext();
+
+  const newChartCode = `${generateMermaidChartData(
+    entityData['keywords-data-agg'],
+    entityData.entityInfo.name,
+  )}`;
 
   const uniqueKeywords = (entityData.articles ?? [])
     .flatMap((article) => article.keywords)
     .filter((keyword, index, self) => self.indexOf(keyword) === index)
     .join(', ');
-
-  // const keywordItems = convertToItems(
-  //   countOccurrences(entityData.articles ?? [], 'keywords'),
-  // );
 
   return (
     <Box
@@ -91,7 +80,9 @@ export default function Content() {
       />
 
       {entityData.articles?.length === 0 ? (
-        <Text size='lg'> No data found yet...please continue screening.</Text>
+        <Center style={{ minHeight: '100vh' }}>
+          <Text size='lg'> No data found yet...please continue screening.</Text>
+        </Center>
       ) : (
         <div>
           <SimpleGrid cols={2}>
@@ -114,25 +105,23 @@ export default function Content() {
               <SimpleGrid cols={2} mb='md'>
                 <InfoRow
                   label='Start Date'
-                  value={entityData.entityInfo.fromDate.toLocaleDateString(
-                    'en-US',
-                    {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    },
-                  )}
+                  value={new Date(
+                    entityData.entityInfo.start_date,
+                  ).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
                 />
                 <InfoRow
                   label='End Date'
-                  value={entityData.entityInfo.endDate.toLocaleDateString(
-                    'en-US',
-                    {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    },
-                  )}
+                  value={new Date(
+                    entityData.entityInfo.end_date,
+                  ).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
                 />
               </SimpleGrid>
 
@@ -160,19 +149,30 @@ export default function Content() {
               </SimpleGrid>
 
               {/* Keywords Section */}
-
               <Text size='md' c='dimmed'></Text>
-              <Text ta={'justify'} size='md'>
+              <Text ta={'justify'} size='md' tt={'capitalize'}>
                 <span className='dimmed-text'>Keywords:</span> {uniqueKeywords}
               </Text>
 
-              {/* Sentiment Analysis */}
               <SentimentAnalysis />
             </Box>
-            <Box>
-              <Articles />
-            </Box>
+            <Articles />
           </SimpleGrid>
+
+          <div style={{ textAlign: 'center' }}>
+            <Text
+              fw={600}
+              size='md'
+              my='md'
+              tt='uppercase'
+              lts={1.5}
+              c={'premiumDark'}
+              ta={'center'}
+            >
+              Entity Mapping
+            </Text>
+            <MermaidChart chart={newChartCode} />
+          </div>
         </div>
       )}
     </Box>

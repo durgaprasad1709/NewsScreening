@@ -18,7 +18,6 @@
 .scrollable {
   height: calc(100vh - 200px);
   padding: 0 var(--mantine-spacing-sm);
-  padding-bottom: var(--mantine-spacing-md);
 }
 
 .navbarMain {
@@ -35,7 +34,7 @@
 
 .footer {
   margin-bottom: var(--mantine-spacing-md);
-  padding: 0 var(--mantine-spacing-sm);
+  padding: var(--mantine-spacing-sm);
 }
 
 .eyTitle {

@@ -14,6 +14,7 @@ import Filters from '../filters';
 import classes from './Articles.module.css';
 import { useDashboardContext } from '../../hooks';
 import { useEffect, useState } from 'react';
+import { capitalizeWords } from '../../utils';
 
 const removeDuplicates = (array: string[]) => [...new Set(array)];
 
@@ -28,7 +29,7 @@ export default function Articles() {
   useEffect(() => {
     const el = document.querySelector('#content-container');
     setHeight(el?.clientHeight ?? 0);
-  }, []);
+  }, [entityData]);
 
   const entityName = entityData.entityInfo.name;
 
@@ -39,7 +40,9 @@ export default function Articles() {
   const filteredArticles =
     currentFilters.length > 0
       ? articles.filter((article) => {
-          const matchesSentiment = currentFilters.includes(article.sentiment);
+          const matchesSentiment = currentFilters.includes(
+            capitalizeWords(article.sentiment),
+          );
           const matchesKeyword = currentFilters.some((keyword) =>
             article.keywords.includes(keyword),
           );
@@ -48,7 +51,7 @@ export default function Articles() {
       : articles;
 
   return (
-    <Box className={classes.container}>
+    <Box>
       {/* Header Section */}
       <Flex
         mb='xs'
@@ -75,8 +78,8 @@ export default function Articles() {
       </Flex>
 
       {/* Scrollable Area */}
-      <Box className={classes.articlesContainer}>
-        <ScrollArea h={height} scrollbarSize={5}>
+      <Box>
+        <ScrollArea.Autosize mah={'100vh'} scrollbarSize={5}>
           {filteredArticles?.map((article) => {
             let sentiment = 'Negative';
             if (article.sentiment.toLowerCase().includes('neutral')) {
@@ -142,7 +145,7 @@ export default function Articles() {
               </Box>
             );
           })}
-        </ScrollArea>
+        </ScrollArea.Autosize>
       </Box>
     </Box>
   );
